@@ -10,16 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: de640fe3d0db1804a85f9fc8f5cadab6, type: 3}
-  m_Name: Pixel Renderer_Renderer
+  m_Name: Pixel Renderer Data
   m_EditorClassIdentifier: 
   debugShaders:
     debugReplacementPS: {fileID: 4800000, guid: cf852408f2e174538bcd9b7fda1c5ae7,
       type: 3}
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
   m_RendererFeatures:
-  - {fileID: 6519113410736046984}
-  - {fileID: 2965434075658541337}
-  m_RendererFeatureMap: 884368791b8b785a1959778c94562729
+  - {fileID: 6040253089821168036}
+  m_RendererFeatureMap: a4113fbc2e4ad353
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -60,7 +59,7 @@ MonoBehaviour:
   m_CopyDepthMode: 1
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
---- !u!114 &2965434075658541337
+--- !u!114 &6040253089821168036
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -73,21 +72,4 @@ MonoBehaviour:
   m_Name: TestFeature
   m_EditorClassIdentifier: 
   m_Active: 1
-  _rt: {fileID: 8400000, guid: a06270831da783a4e9ba6c8120e2a574, type: 2}
---- !u!114 &6519113410736046984
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a8a382f627f57b54ab0a8e08f4970d9a, type: 3}
-  m_Name: PixelRenderingFeature
-  m_EditorClassIdentifier: 
-  m_Active: 1
-  _width: 320
-  _height: 180
-  _normalPassMaterial: {fileID: 2100000, guid: 6a9c1195a533f344c853c0c6438b9aca, type: 2}
-  _evt: 550
+  _settings: {fileID: 11400000, guid: 7b759e56bcc4d574da5936cb2116820d, type: 2}

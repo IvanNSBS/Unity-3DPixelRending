@@ -1,15 +1,16 @@
-﻿using UnityEngine;
-using UnityEngine.Rendering;
+﻿using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using PixelRendering.PixelRenderingFeature;
 
 namespace PixelRendering.TestPass
 {
-    public class TestPass : ScriptableRenderPass
+    public class RenderAsPixelsPass : ScriptableRenderPass
     {
-        private RenderTexture _rt;
-        public TestPass(RenderTexture rt)
+        private PixelSettings _settings;
+        
+        public RenderAsPixelsPass(PixelSettings settings)
         {
-            _rt = rt;
+            _settings = settings;
             renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing;
         }
         
@@ -17,9 +18,11 @@ namespace PixelRendering.TestPass
         {
             if (renderingData.cameraData.camera.tag != "MainCamera")
                 return;
+            
             var cmd = CommandBufferPool.Get();
             var cameraRT = renderingData.cameraData.renderer.cameraColorTargetHandle;
-            cmd.Blit(_rt, cameraRT);
+            // cmd.Blit(_settings.rt, cameraRT);
+            cmd.Blit(_settings.rt, cameraRT, _settings.OutlineBlitMaterial);
             context.ExecuteCommandBuffer(cmd);
             cmd.Clear();
         }
