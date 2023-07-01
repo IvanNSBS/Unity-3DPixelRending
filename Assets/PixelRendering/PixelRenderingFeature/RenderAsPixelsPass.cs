@@ -21,8 +21,7 @@ namespace PixelRendering.TestPass
             
             var cmd = CommandBufferPool.Get();
             var cameraRT = renderingData.cameraData.renderer.cameraColorTargetHandle;
-            // cmd.Blit(_settings.rt, cameraRT);
-            cmd.Blit(_settings.rt, cameraRT, _settings.OutlineBlitMaterial);
+            cmd.Blit(_settings.rt, cameraRT);
             context.ExecuteCommandBuffer(cmd);
             cmd.Clear();
         }

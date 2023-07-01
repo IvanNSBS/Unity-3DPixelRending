@@ -10,15 +10,16 @@ namespace PixelRendering.RenderPass
     {
         private PixelSettings _settings;
         
-        private int _normalsTexture = Shader.PropertyToID("_NormalsPassTexture");
-        private int _depthTexture = Shader.PropertyToID("_DepthPassTexture");
+        private RTHandle _normalsTexture;
+        private RTHandle _depthTexture;
+        
         private List<ShaderTagId> _shaderTagIdList;
         private FilteringSettings _filterSettings;
         private ProfilingSampler _profilingSampler;
         
         public NormalsPass(PixelSettings settings)
         {
-            renderPassEvent = RenderPassEvent.BeforeRenderingOpaques;
+            renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing;
             _settings = settings;
             
             _shaderTagIdList = new List<ShaderTagId>
@@ -34,10 +35,9 @@ namespace PixelRendering.RenderPass
 
         public override void Configure(CommandBuffer cmd, RenderTextureDescriptor cameraTextureDescriptor)
         {
-            int width = _settings.width; 
-            int height = _settings.height;
-            cmd.GetTemporaryRT(_normalsTexture, width, height, 0, FilterMode.Point);
-            cmd.GetTemporaryRT(_depthTexture, width, height, 32, FilterMode.Point, RenderTextureFormat.Depth);
+            _normalsTexture = RTHandles.Alloc(cameraTextureDescriptor.width, cameraTextureDescriptor.height, name: "Normals Texture");
+            _depthTexture = RTHandles.Alloc(cameraTextureDescriptor.width, cameraTextureDescriptor.height,
+                depthBufferBits: DepthBits.Depth32, name:"Depth");
             
             ConfigureTarget(_normalsTexture, _depthTexture);
         }
@@ -73,8 +73,9 @@ namespace PixelRendering.RenderPass
 
         public override void OnCameraCleanup(CommandBuffer cmd)
         {
-            cmd.ReleaseTemporaryRT(_normalsTexture);
-            cmd.ReleaseTemporaryRT(_depthTexture);
+            // _normalsTexture.Release();
+            // _depthTexture.Release();
+            // _outlineIntermediateTex.Release();
         }
     }
 }
