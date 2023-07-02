@@ -12,12 +12,11 @@ namespace PixelRendering.RenderPass
         private PixelSettings _settings;
         private RenderTextureDescriptor _descriptor;
         
-        private int _testColor = Shader.PropertyToID("asdasdsa");
-        private int _testIm = Shader.PropertyToID("230948u238932y7984 ");
-        private int _testDepth = Shader.PropertyToID("1290381290");
+        private int _normalsColorBuffer = Shader.PropertyToID("Normal Color RT");
+        private int _normalsDepthBuffer = Shader.PropertyToID("Normal Depth RT");
+        private int _intermediateColorBuffer = Shader.PropertyToID("Intermediate Color RT");
 
         private RTHandle _cameraColorBuffer;
-        private RTHandle _cameraDepthBuffer;
         
         private List<ShaderTagId> _shaderTagIdList;
         private FilteringSettings _filterSettings;
@@ -42,7 +41,6 @@ namespace PixelRendering.RenderPass
         public void Setup(RTHandle color, RTHandle depth)
         {
             _cameraColorBuffer = color;
-            _cameraDepthBuffer = depth;
         }
 
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
@@ -56,13 +54,13 @@ namespace PixelRendering.RenderPass
             
             using (new ProfilingScope(cmd, _profilingSampler))
             {
-                cmd.GetTemporaryRT(_testColor, width , height, 0, FilterMode.Point, GraphicsFormat.R8G8B8A8_UNorm);
-                cmd.GetTemporaryRT(_testDepth, width, height , 16, FilterMode.Point, RenderTextureFormat.Depth);
+                cmd.GetTemporaryRT(_normalsColorBuffer, width , height, 0, FilterMode.Point, GraphicsFormat.R8G8B8A8_UNorm);
+                cmd.GetTemporaryRT(_normalsDepthBuffer, width, height , 16, FilterMode.Point, RenderTextureFormat.Depth);
                 
                 cmd.SetRenderTarget(
-                    _testColor, 
+                    _normalsColorBuffer, 
                     RenderBufferLoadAction.Load, RenderBufferStoreAction.Store,
-                    _testDepth,
+                    _normalsDepthBuffer,
                     RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
                 
                 cmd.ClearRenderTarget(true, true, Color.clear);
@@ -76,27 +74,27 @@ namespace PixelRendering.RenderPass
                 context.ExecuteCommandBuffer(cmd);
                 cmd.Clear();
                 
-                cmd.SetGlobalTexture("_NormalsPassTexture", _testColor);
-                cmd.SetGlobalTexture("_DepthTexture", _testDepth);
+                cmd.SetGlobalTexture("_NormalsPassTexture", _normalsColorBuffer);
+                cmd.SetGlobalTexture("_DepthTexture", _normalsDepthBuffer);
                 context.ExecuteCommandBuffer(cmd);
                 cmd.Clear();
                 
-                cmd.GetTemporaryRT(_testIm, width , height, 0, FilterMode.Point, GraphicsFormat.R8G8B8A8_UNorm);
-                cmd.SetRenderTarget(_testIm, RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
+                cmd.GetTemporaryRT(_intermediateColorBuffer, width , height, 0, FilterMode.Point, GraphicsFormat.R8G8B8A8_UNorm);
+                cmd.SetRenderTarget(_intermediateColorBuffer, RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
                 cmd.ClearRenderTarget(false, true, Color.clear);
                 context.ExecuteCommandBuffer(cmd);
                 cmd.Clear();
                 
                 _settings.OutlineBlitMaterial.SetFloat("_depthEdgeStrength", _settings.depthEdgeStrength);
                 _settings.OutlineBlitMaterial.SetFloat("_normalEdgeStrength", _settings.normalEdgeStrength);
-                cmd.Blit(_cameraColorBuffer, _testIm, _settings.OutlineBlitMaterial);
-                cmd.Blit(_testIm, _cameraColorBuffer);
+                cmd.Blit(_cameraColorBuffer, _intermediateColorBuffer, _settings.OutlineBlitMaterial);
+                cmd.Blit(_intermediateColorBuffer, _cameraColorBuffer);
                 context.ExecuteCommandBuffer(cmd);
                 cmd.Clear();
                 
-                cmd.ReleaseTemporaryRT(_testColor);
-                cmd.ReleaseTemporaryRT(_testDepth);
-                cmd.ReleaseTemporaryRT(_testIm);
+                cmd.ReleaseTemporaryRT(_normalsColorBuffer);
+                cmd.ReleaseTemporaryRT(_normalsDepthBuffer);
+                cmd.ReleaseTemporaryRT(_intermediateColorBuffer);
             }
             
             context.ExecuteCommandBuffer(cmd); 
