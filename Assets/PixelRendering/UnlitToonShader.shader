@@ -56,13 +56,14 @@ Shader "Unlit/UnlitToonShader"
                 float3 lightColor = _LightColor0;
                 
                 float cos = max(0, dot(lightDirection, i.normal));
-                if(cos < 0.2)
-                    cos = 0.2;
-                else
-                    cos = 1;
+                cos = clamp(cos, 0.4, 1);
+                // if(cos < 0.4)
+                //     cos = 0.4;
+                // else
+                //     cos = 1;
 
                 fixed3 col = _Color;
-                col = col * cos * lightColor;
+                col = col * cos; //* lightColor;
                 return fixed4(col, 1);
             }
             ENDCG

@@ -18,3 +18,5 @@ MonoBehaviour:
   _renderNormalsMat: {fileID: 2100000, guid: 6a9c1195a533f344c853c0c6438b9aca, type: 2}
   _outlineBlitMaterial: {fileID: 2100000, guid: 9b5abd7656231ec4b98a3146e6d4265e,
     type: 2}
+  _depthEdgeStrength: 1
+  _normalEdgeStrength: 1

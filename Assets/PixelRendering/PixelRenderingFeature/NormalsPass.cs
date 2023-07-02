@@ -55,7 +55,7 @@ namespace PixelRendering.RenderPass
             using (new ProfilingScope(cmd, _profilingSampler))
             {
                 cmd.GetTemporaryRT(_normalsColorBuffer, width , height, 0, FilterMode.Point, GraphicsFormat.R8G8B8A8_UNorm);
-                cmd.GetTemporaryRT(_normalsDepthBuffer, width, height , 16, FilterMode.Point, RenderTextureFormat.Depth);
+                cmd.GetTemporaryRT(_normalsDepthBuffer, width, height , 32, FilterMode.Point, RenderTextureFormat.Depth);
                 
                 cmd.SetRenderTarget(
                     _normalsColorBuffer, 

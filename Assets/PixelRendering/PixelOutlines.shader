@@ -36,25 +36,31 @@ Shader "Hidden/PixelOutlines"
 
         TEXTURE2D(_MainTex);
         float4 _MainTex_TexelSize;
-        float4 _MainTex_ST;
-
+		float4 _MainTex_ST;
+        
         sampler2D _NormalsPassTexture;
         sampler2D _DepthTexture;
-        
+        float4 _NormalsPassTexture_TexelSize;
+        float4 _DepthTexture_TexelSize;
+
         SamplerState sampler_point_clamp;
         
         uniform float _depthEdgeStrength;
         uniform float _normalEdgeStrength;
 
         float getDepth(int x, int y, float2 vUv) {
-            return tex2D( _DepthTexture, vUv + float2(x, y)*_MainTex_TexelSize.xy ).r;
+        	#if UNITY_REVERSED_Z
+            return 1 - tex2D( _DepthTexture, vUv + float2(x, y)*_DepthTexture_TexelSize.xy ).r;
+			#else
+        	return tex2D( _DepthTexture, vUv + float2(x, y)*_DepthTexture_TexelSize.xy ).r;
+        	#endif
         }
 
         float3 getNormal(int x, int y, float2 vUv) {
-            return tex2D( _NormalsPassTexture, vUv + float2(x, y)*_MainTex_TexelSize.xy ).rgb * 2.0 - 1.0;
+            return tex2D( _NormalsPassTexture, vUv + float2(x, y)*_NormalsPassTexture_TexelSize.xy ).rgb * 2. - 1.;
         }
 
-		float depthEdgeIndicator(float depth, float3 normal, float2 vUv) {
+		float depthEdgeIndicator(float depth, float2 vUv) {
 			float diff = 0.0;
 			diff += clamp(getDepth(1, 0, vUv) - depth, 0.0, 1.0);
 			diff += clamp(getDepth(-1, 0, vUv) - depth, 0.0, 1.0);
@@ -76,8 +82,8 @@ Shader "Hidden/PixelOutlines"
 			// Only the shallower pixel should detect the normal edge.
 			float depthIndicator = clamp(sign(depthDiff * .25 + .0025), 0.0, 1.0);
 
-			return (1.0 - dot(normal, neighborNormal)) * depthIndicator * normalIndicator;
-            return distance(normal, getNormal(x, y, vUv)) * depthIndicator * normalIndicator;
+			// return (1.0 - dot(normal, neighborNormal)) * depthIndicator * normalIndicator;
+            return distance(normal, neighborNormal) * depthIndicator * normalIndicator;
 		}
 
 		float normalEdgeIndicator(float depth, float3 normal, float2 vUv)
@@ -93,15 +99,6 @@ Shader "Hidden/PixelOutlines"
 
 		}
 
-        float lum(float4 color) {
-            float4 weights = float4(.2126, .7152, .0722, .0);
-            return dot(color, weights);
-        }
-
-        float smoothSign(float x, float radius) {
-            return smoothstep(-radius, radius, x) * 2.0 - 1.0;
-        }
-        
         Varyings vert(Attributes IN)
         {
             Varyings OUT;
@@ -119,9 +116,6 @@ Shader "Hidden/PixelOutlines"
             HLSLPROGRAM
             float4 frag(Varyings IN) : SV_TARGET
             {
-                // float2 blockPos = floor(IN.uv * _BlockCount);
-                // float2 uv = blockPos * _BlockSize + _HalfBlockSize;
-                // return float4(IN.uv.xy, 0, 1);
                 float4 texel = SAMPLE_TEXTURE2D(_MainTex, sampler_point_clamp, IN.uv);
 
 				float depth = 0.0;
@@ -134,26 +128,26 @@ Shader "Hidden/PixelOutlines"
 
 				float dei = 0.0;
 				if (_depthEdgeStrength > 0.0) 
-					dei = depthEdgeIndicator(depth, normal, IN.uv);
+					dei = depthEdgeIndicator(depth, IN.uv);
 
 				float nei = 0.0; 
 				if (_normalEdgeStrength > 0.0) 
-					nei = normalEdgeIndicator(dei, normal, IN.uv);
+					nei = normalEdgeIndicator(depth, normal, IN.uv);
 
-				float strength = dei > 0.0 ? (1.0 - _depthEdgeStrength * dei) : (1.0 + _normalEdgeStrength * nei);
-				
+            	float strength = dei > 0.0 ? (1.0 - _depthEdgeStrength * dei) : (1.0 + _normalEdgeStrength * nei);
+            	
+            	// Camera's FAR and NEAR properties directlly correlates to depth outlines since they define the range
+            	// of the camera values. Smaller Camera FAR value results in more depth outlines
+				// float d = getDepth(0, 0, IN.uv);
+				// float4 depthRender = float4(d, d, d, 1);
+            	// float4 normalRender = float4(getNormal(0, 0, IN.uv), 1.);
+
+            	// return depthRender;
             	return texel * strength;
             	
-                // float depth = 1 - tex2D(_DepthTexture, IN.uv).r;
-                // float3 normal = tex2D( _NormalsPassTexture, IN.uv);
-                // return float4(depth * 5, 0., 0., 1);
-                // return float4(normal, 1);
-                // return float4(getNormal(0, 0, IN.uv), 1);
-                // return float4(getNormal(0,0, IN.uv), 1);
-                return float4(dei, dei, dei, 1);
-                // return float4(nei, nei, nei, 1);
-                // return float4(coefficient, coefficient, coefficient, 1);
-                // return float4(dei + nei, dei + nei, dei + nei, 1);
+                //return float4(normal, 1);
+                //return float4(dei, dei, dei, 1);
+                return float4(nei, nei, nei, 1);
             }
             ENDHLSL
         }
