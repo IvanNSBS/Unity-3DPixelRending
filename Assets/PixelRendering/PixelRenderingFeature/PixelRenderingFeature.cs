@@ -36,6 +36,11 @@ public class PixelRenderingFeature : ScriptableRendererFeature
         renderer.EnqueuePass(_renderAsPixelsPass);
     }
 
+    public override void SetupRenderPasses(ScriptableRenderer renderer, in RenderingData renderingData)
+    {
+        _normalsPass.Setup(renderingData.cameraData.renderer.cameraColorTargetHandle, renderingData.cameraData.renderer.cameraDepthTargetHandle);
+    }
+
     private bool ValidateSettings()
     {
         if (_settings == null)
