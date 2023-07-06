@@ -50,14 +50,14 @@ Shader "Hidden/PixelOutlines"
 
         float getDepth(int x, int y, float2 vUv) {
         	#if UNITY_REVERSED_Z
-            return 1 - tex2D( _DepthTexture, vUv + float2(x, y)*_DepthTexture_TexelSize.xy ).r;
+            return 1 - tex2D( _DepthTexture, vUv + float2(x, y)*_MainTex_TexelSize.xy ).r;
 			#else
-        	return tex2D( _DepthTexture, vUv + float2(x, y)*_DepthTexture_TexelSize.xy ).r;
+        	return tex2D( _DepthTexture, vUv + float2(x, y)*_MainTex_TexelSize.xy ).r;
         	#endif
         }
 
         float3 getNormal(int x, int y, float2 vUv) {
-            return tex2D( _NormalsPassTexture, vUv + float2(x, y)*_NormalsPassTexture_TexelSize.xy ).rgb * 2. - 1.;
+            return tex2D( _NormalsPassTexture, vUv + float2(x, y)*_MainTex_TexelSize.xy ).rgb * 2. - 1.;
         }
 
 		float depthEdgeIndicator(float depth, float2 vUv) {
