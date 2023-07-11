@@ -149,7 +149,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2159342}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.64, y: 2.45, z: -0.02}
+  m_LocalPosition: {x: -0.09, y: 1.69, z: -1.56}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -190,9 +190,9 @@ Light:
   serializedVersion: 10
   m_Type: 2
   m_Shape: 0
-  m_Color: {r: 0.9150943, g: 0.46690372, b: 0, a: 1}
+  m_Color: {r: 0.7924528, g: 0.3772457, b: 0.078497685, a: 1}
   m_Intensity: 1
-  m_Range: 12.86
+  m_Range: 2.97
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
@@ -891,7 +891,7 @@ Camera:
   far clip plane: 40
   field of view: 60
   orthographic: 1
-  orthographic size: 3.453125
+  orthographic size: 3.953125
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
@@ -1209,7 +1209,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1721532533}
   m_LocalRotation: {x: 0, y: 0.38268343, z: 0, w: 0.92387956}
-  m_LocalPosition: {x: 1.9400228, y: 1.4999812, z: -0.70004773}
+  m_LocalPosition: {x: 2.58, y: 1.4999812, z: -0.86}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1265,7 +1265,7 @@ Light:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1875394621}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 10
   m_Type: 0
   m_Shape: 0
@@ -1327,14 +1327,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1875394621}
-  m_LocalRotation: {x: 0.3579503, y: 0.13472854, z: -0.31328472, w: 0.86923677}
+  m_LocalRotation: {x: 0.42698818, y: 0.15959221, z: -0.3013793, w: 0.8374855}
   m_LocalPosition: {x: -1.51, y: 3.75, z: -2.14}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1386035286}
   m_RootOrder: -1
-  m_LocalEulerAnglesHint: {x: 44.967, y: 0.805, z: -39.306}
+  m_LocalEulerAnglesHint: {x: 54.232, y: 0.975, z: -39.085}
 --- !u!64 &1875394625
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -1472,7 +1472,7 @@ Camera:
   far clip plane: 50
   field of view: 60
   orthographic: 1
-  orthographic size: 3.453125
+  orthographic size: 3.953125
   m_Depth: -2
   m_CullingMask:
     serializedVersion: 2

@@ -71,11 +71,11 @@ Shader "Lit/UnlitToonShader"
                 float count = GetAdditionalLightsCount();
                 for(int j = 0; j < count; j++)
                 {
-                    Light light = GetAdditionalLight(j, i.fragmentPos, 1);
+                    Light light = GetAdditionalLightCustom(j, i.fragmentPos);
                     
                     float diffuse = saturate(dot(i.normal, light.direction));
                     float3 radiance = light.color * light.distanceAttenuation * light.shadowAttenuation;
-                    float3 color = _Color * radiance * diffuse;
+                    float3 color = _Color * radiance;// * diffuse;
                     
                     col += color;
                 }
