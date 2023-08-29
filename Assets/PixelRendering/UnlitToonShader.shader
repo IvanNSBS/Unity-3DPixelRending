@@ -22,11 +22,20 @@ Shader "Lit/UnlitToonShader"
             #pragma vertex vert
             #pragma fragment frag
 
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
+            #pragma multi_compile _ _SHADOWS_HARD
+            #pragma multi_compile_fog
+
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderVariablesFunctions.hlsl"
             #include "./ToonLighting.hlsl"
 
+            CBUFFER_START(UnityPerMaterial)
+            float4 _ShadowColor;
+            CBUFFER_END
+            
             struct appdata
             {
                 float4 vertexOS : POSITION;
@@ -36,9 +45,10 @@ Shader "Lit/UnlitToonShader"
 
             struct v2f
             {
-                float3 fragmentPos : TEXCOORD0;
                 float4 vertex : SV_POSITION;
                 float3 normal : NORMAL;
+                float3 fragmentPos : TEXCOORD0;
+                float3 worldSpacePos : TEXCOORD1;
             };
 
             float4 _Color;
@@ -52,14 +62,18 @@ Shader "Lit/UnlitToonShader"
                 o.vertex = TransformObjectToHClip(v.vertexOS);
                 o.normal = normalize(mul((float3x3)unity_ObjectToWorld, v.normalOS));
                 o.fragmentPos = posnInputs.positionWS;
+                o.worldSpacePos = mul(unity_ObjectToWorld, v.vertexOS);
                 return o;
             }
 
             float4 frag (v2f i) : SV_Target
             {
                 // sample the xCoord
-                Light main_light = GetMainLight();
-                float3 lightColor = main_light.color;
+                float4 shadowCoord = TransformWorldToShadowCoord(i.worldSpacePos);
+                Light main_light = GetMainLight(shadowCoord);
+                main_light.shadowAttenuation = clamp(main_light.shadowAttenuation, 0.3, 1);
+                
+                float3 lightColor = main_light.color * main_light.shadowAttenuation;
                 float3 lightDirection = normalize(main_light.direction);
 
                 float cos = saturate(dot(lightDirection, i.normal));
@@ -75,19 +89,43 @@ Shader "Lit/UnlitToonShader"
                     
                     float diffuse = saturate(dot(i.normal, light.direction));
                     float3 radiance = light.color * light.distanceAttenuation * light.shadowAttenuation;
-                    float3 color = _Color * radiance;// * diffuse;
+                    float3 color = _Color * radiance; //* diffuse;
                     
                     col += color;
                 }
-
-                // if(cos < 0.4)
-                //     cos = 0.4;
-                // else
-                //     cos = 1;
-
-
                 return float4(col, 1);
             }
+            ENDHLSL
+        }
+
+        Pass {
+            Name "ShadowCaster"
+            Tags { "LightMode"="ShadowCaster" }
+         
+            ZWrite On
+            ZTest LEqual
+         
+            HLSLPROGRAM
+            // Required to compile gles 2.0 with standard srp library
+            #pragma prefer_hlslcc gles
+            #pragma exclude_renderers d3d11_9x gles
+            //#pragma target 4.5
+         
+            // Material Keywords
+            #pragma shader_feature _ALPHATEST_ON
+            #pragma shader_feature _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+         
+            // GPU Instancing
+            #pragma multi_compile_instancing
+            #pragma multi_compile _ DOTS_INSTANCING_ON
+                     
+            #pragma vertex ShadowPassVertex
+            #pragma fragment ShadowPassFragment
+             
+            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/ShadowCasterPass.hlsl"
+         
             ENDHLSL
         }
     }

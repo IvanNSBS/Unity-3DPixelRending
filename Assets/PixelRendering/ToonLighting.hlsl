@@ -18,6 +18,64 @@ struct CustomLight
     float3 layerMask;
 };
 
+float GetPointLightAttenuation(float4 distanceAndSpotAttenuation, float3 positionWS, float3 lightPositionWS)
+{
+    int n = 5;
+    float min_att = 0.1;
+
+    // rcp function is a efficient approximation of 1/x.
+    // Unity, for point lights, stores the light range value squared, so we do this
+    // operation here to restore this data and compute our own attenuation.
+    float light_range = rcp(sqrt(distanceAndSpotAttenuation.x));
+    
+    float dst = distance(positionWS, lightPositionWS);
+    float old_min = 0, new_min = min_att;
+    float old_max = 1, new_max = 1;
+    
+    float att = (light_range - dst) / light_range;
+    att = smoothstep(0, 1, att);
+    att = (att - old_min) * (new_max - new_min) / (old_max - old_min) + new_min;
+            
+    old_min = new_min, new_min = 1;
+    old_max = new_max, new_max = n+1;
+    att = (att - old_min) * (new_max - new_min) / (old_max - old_min) + new_min;
+    att = floor(att);
+    
+    old_min = 0, new_min = min_att;
+    old_max = 1, new_max = 1;
+    att = (att - old_min) * (new_max - new_min) / (old_max - old_min) + new_min;
+
+    return att * step(dst, light_range);
+}
+
+float GetSpotAttenuation(float3 spotDirection, float3 lightDirection, float2 spotAttenuation)
+{
+    half SdotL = dot(spotDirection, lightDirection);
+    half atten = saturate(SdotL * spotAttenuation.x + spotAttenuation.y);
+    // return atten;
+    atten = atten * step(0.1, atten);
+    
+    int n = 5;
+    float min_att = 0.1;
+
+    float old_min = 0, new_min = min_att;
+    float old_max = 1, new_max = 1;
+    
+    float att = atten;
+    // att = smoothstep(0, 1, att);
+    att = (att - old_min) * (new_max - new_min) / (old_max - old_min) + new_min;
+            
+    old_min = new_min, new_min = 1;
+    old_max = new_max, new_max = n+1;
+    att = (att - old_min) * (new_max - new_min) / (old_max - old_min) + new_min;
+    att = floor(att);
+    
+    old_min = 0, new_min = min_att;
+    old_max = 1, new_max = 1;
+    att = (att - old_min) * (new_max - new_min) / (old_max - old_min) + new_min;
+    return att * atten;
+}
+
 // Fills a light struct given a perObjectLightIndex
 Light GetAdditionalPerObjectLightCustom(int perObjectLightIndex, float3 positionWS)
 {
@@ -43,37 +101,11 @@ Light GetAdditionalPerObjectLightCustom(int perObjectLightIndex, float3 position
 
     half3 lightDirection = half3(lightVector * rsqrt(distanceSqr));
     // full-float precision required on some platforms
-    float attenuation = DistanceAttenuation(distanceSqr, distanceAndSpotAttenuation.xy) * AngleAttenuation(spotDirection.xyz, lightDirection, distanceAndSpotAttenuation.zw);
-    int n = 3;
-    float min_att = 0.4;
-    float light_range = rcp(sqrt(distanceAndSpotAttenuation.x));
+    // float attenuation = DistanceAttenuation(distanceSqr, distanceAndSpotAttenuation.xy) * AngleAttenuation(spotDirection.xyz, lightDirection, distanceAndSpotAttenuation.zw);
+    float attenuation = GetPointLightAttenuation(distanceAndSpotAttenuation, positionWS, lightPositionWS);
+    attenuation *= GetSpotAttenuation(spotDirection.xyz, lightDirection, distanceAndSpotAttenuation.zw) * 0.2;
+    // attenuation = GetSpotAttenuation(spotDirection.xyz, lightDirection, distanceAndSpotAttenuation.zw);
     
-    float dst = distance(positionWS, lightPositionWS);
-    if(dst > light_range)
-    {
-        attenuation = 0;
-    }
-    else
-    {
-        float old_min = 0, new_min = min_att;
-        float old_max = 1, new_max = 1;
-
-        float att = (light_range - dst) / light_range;
-        att = smoothstep(0, 1, att);
-        att = (att - old_min) * (new_max - new_min) / (old_max - old_min) + new_min;
-                
-        old_min = new_min, new_min = 1;
-        old_max = new_max, new_max = n+1;
-        att = (att - old_min) * (new_max - new_min) / (old_max - old_min) + new_min;
-        att = floor(att);
-        
-        old_min = 0, new_min = min_att;
-        old_max = 1, new_max = 1;
-        att = (att - old_min) * (new_max - new_min) / (old_max - old_min) + new_min;
-
-        attenuation = att;
-    }
-
     Light light;
     light.direction = lightDirection;
     light.distanceAttenuation = attenuation;
